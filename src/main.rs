@@ -4,7 +4,7 @@
 use std::env; // For env::args()
 use std::process; // For process::exit()
 
-use minigrep::{self, Config};
+use minigrep::Config;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
