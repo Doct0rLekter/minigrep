@@ -2,16 +2,24 @@
 #![warn(clippy::pedantic)]
 
 use std::env;
+use std::error::Error;
 use std::fs;
+use std::process;
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    let config = Config::new(&args);
-    let contents = read_file(&config.file_path);
+    let config = Config::build(&args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {err}");
+        process::exit(1);
+    });
 
-    println!("Searching for: {}\n", config.query);
+    println!("Searching for: {}", config.query);
     println!("In file: {}\n", config.file_path);
-    println!("With text:\n{contents}");
+
+    if let Err(e) = run(config) {
+        println!("Apllication error: {e}");
+        process::exit(1);
+    }
 }
 
 struct Config {
@@ -20,14 +28,21 @@ struct Config {
 }
 
 impl Config {
-    fn new(args: &[String]) -> Config {
+    fn build(args: &[String]) -> Result<Config, &'static str> {
+        if args.len() < 3 {
+            return Err("Not enough arguments\n (Usage: cargo run -- text file.txt)");
+        }
         let query = args[1].clone();
         let file_path = args[2].clone();
 
-        Config { query, file_path }
+        Ok(Config { query, file_path })
     }
 }
 
-fn read_file(file_path: &str) -> String {
-    fs::read_to_string(file_path).expect("Could not read the file")
+fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    let contents = fs::read_to_string(config.file_path)?;
+
+    println!("With text:\n{contents}");
+
+    Ok(())
 }
