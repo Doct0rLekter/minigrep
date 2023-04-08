@@ -14,11 +14,11 @@ fn main() {
         process::exit(1);
     });
 
-    println!("Searching for: {}", config.query);
-    println!("In file: {}", config.file_path);
+    println!("\nSearching for: '{}'", config.query);
+    println!("In file: '{}'", config.file_path);
 
     if let Err(e) = minigrep::run(config) {
-        println!("Apllication error: {e}");
+        println!("Application error: {e}");
         process::exit(1);
     }
 }

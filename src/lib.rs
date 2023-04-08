@@ -21,14 +21,24 @@ impl Config {
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let contents = fs::read_to_string(config.file_path)?;
 
-    for line in search(&config.query, &contents) {
-        println!("\"{line}\"");
+    let matched = search(&config.query, &contents);
+
+    if matched == None {
+        println!("    No matches found!")
+    } else {
+        let mut match_count = 0;
+        for line in matched.unwrap() {
+            println!("    Line match! \"{line}\"");
+            match_count += 1;
+        }
+        println!("    {match_count} match(es) found")
     }
+
 
     Ok(())
 }
 
-pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+pub fn search<'a>(query: &str, contents: &'a str) -> Option<Vec<&'a str>> {
     let mut results = Vec::new();
 
     for line in contents.lines() {
@@ -36,7 +46,11 @@ pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
             results.push(line);
         }
     }
-    results
+
+    if results.len() < 1 {
+        return None
+    }
+    Some(results)
 }
 
 #[cfg(test)]
@@ -51,6 +65,16 @@ Rust:
 safe, fast, productive.
 Pick three.";
 
-        assert_eq!(vec!["safe, fast, productive."], search(query, contents))
+        assert_eq!(vec!["safe, fast, productive."], search(query, contents).unwrap())
+    }
+
+    #[test]
+    fn no_matches() {
+        let query = "nuthin, honey";
+        let contents = "\
+Three
+Blind
+Mice";
+        assert_eq!(None, search(query, contents))
     }
 }
