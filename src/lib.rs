@@ -10,7 +10,7 @@ pub struct Config {
 impl Config {
     pub fn build(args: &[String]) -> Result<Config, &'static str> {
         if args.len() < 3 {
-            return Err("Not enough arguments\n Usage: cargo run -- 'text' 'file.txt'");
+            return Err("Not enough arguments\n    Usage: cargo run -- 'text' 'file.txt'");
         }
         let query = args[1].clone();
         let file_path = args[2].clone();
